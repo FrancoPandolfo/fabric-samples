@@ -20,9 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.Identity;
 import java.security.InvalidKeyException;
-import java.security.Signer;
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
@@ -209,7 +207,7 @@ public class RecetaService {
             e.printStackTrace();
         }
     }
-
+/* 
     public ResultadoPaginado<RecetaDto> obtenerRecetasPorDniYEstadoPaginado(
             String dni, String estado, int pageSize, String bookmark) throws GatewayException, IOException {
 
@@ -226,4 +224,5 @@ public class RecetaService {
 
         return new ObjectMapper().readValue(result, type);
     }
+*/
 }
