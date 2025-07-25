@@ -30,48 +30,44 @@ public class VacunaController {
     @PostMapping("/crear")
     public ResponseEntity<AssetIdDto> crearVacuna(@RequestBody Vacuna vacuna) {
         System.out.println("\n--> Submit Transaction: CrearVacuna");
-    
-        // Log para verificar los valores iniciales
-        System.out.println("Vacuna recibida: " + vacuna);
-    
+
         // Validación básica
         if (vacuna == null || vacuna.getPatientDocumentNumber() == null || vacuna.getPatientDocumentNumber().isEmpty()) {
             System.err.println("Datos de vacuna inválidos: faltan campos requeridos.");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-    
+
         String now = LocalDateTime.now().toString();
         String dni = vacuna.getPatientDocumentNumber();
-    
-        // Log para ver el DNI y el timestamp
+
+        System.out.println("Vacuna recibida: " + vacuna);
         System.out.println("DNI del paciente: " + dni);
         System.out.println("Timestamp actual: " + now);
-    
+
         String id = dni + now;
         String assetId = Hashing.sha256(id);
-    
-        // Log para ver el ID generado
+
         System.out.println("ID generado para el asset: " + assetId);
-    
+
         vacuna.setId(assetId);
-    
+
         AssetIdDto assetIdDto = new AssetIdDto();
         assetIdDto.setDni(dni);
         assetIdDto.setTimeStamp(now);
-    
+
         try {
-            // Log antes de intentar registrar la vacuna
             System.out.println("Intentando registrar la vacuna..." + vacuna);
-    
             vacunaService.cargarVacuna(vacuna);
-    
-            // Log después de que la vacuna fue registrada
             System.out.println("Vacuna registrada correctamente.");
-    
             return new ResponseEntity<>(assetIdDto, HttpStatus.OK);
+
         } catch (CommitStatusException | EndorseException | CommitException | SubmitException e) {
-            // Log de error
             System.err.println("Error al registrar la vacuna: " + e.getMessage());
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+
+        } catch (RuntimeException e) {
+            System.err.println("Error inesperado al registrar la vacuna: " + e.getMessage());
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -87,7 +83,13 @@ public class VacunaController {
 
             Vacuna vacuna = vacunaService.obtenerVacuna(id);
             return new ResponseEntity<>(vacuna, HttpStatus.OK);
+
         } catch (IOException | GatewayException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+
+        } catch (RuntimeException e) {
+            System.err.println("Error inesperado al obtener la vacuna: " + e.getMessage());
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
