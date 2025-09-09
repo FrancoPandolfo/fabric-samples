@@ -1,14 +1,18 @@
 package com.code.hyperledger.services;
 
 import com.code.hyperledger.configs.FabricConfigProperties;
+import com.code.hyperledger.models.RecetaDto;
 import com.code.hyperledger.models.Vacuna;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JavaType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
 import io.grpc.TlsChannelCredentials;
 import lombok.SneakyThrows;
+import main.java.com.code.hyperledger.models.ResultadoPaginado;
+
 import org.hyperledger.fabric.client.*;
 import org.hyperledger.fabric.client.identity.*;
 import org.springframework.stereotype.Service;
@@ -130,15 +134,16 @@ public class VacunaService {
                 objectMapper.getTypeFactory().constructCollectionType(List.class, Vacuna.class));
     }
 
-    public List<Vacuna> obtenerVacunasPorDniYEstado(String dni, String estado) throws GatewayException, IOException {
+    public ResultadoPaginado<Vacuna> obtenerVacunasPorDniPaginado(String dni, int pageSize, String bookmark) throws GatewayException, IOException {
         ObjectMapper objectMapper = new ObjectMapper();
-        byte[] evaluateResult;
-        if (estado == null || estado.isBlank()) {
-            evaluateResult = contract.evaluateTransaction("GetVacunasPorDni", dni);
-        } else {
-            evaluateResult = contract.evaluateTransaction("GetVacunasPorDniYEstado", dni, estado);
-        }
-        return objectMapper.readValue(evaluateResult,
-                objectMapper.getTypeFactory().constructCollectionType(List.class, Vacuna.class));
+        byte[] result;
+
+        result = contract.evaluateTransaction("GetVacunasPorDniPaginado", dni, pageSize > 0 ? String.valueOf(pageSize) : "10", bookmark != null ? bookmark : "");
+
+        ObjectMapper mapper = new ObjectMapper();
+        JavaType tipo = mapper.getTypeFactory()
+                .constructParametricType(ResultadoPaginado.class, Vacuna.class);
+
+        return mapper.readValue(result, tipo);
     }
 }
