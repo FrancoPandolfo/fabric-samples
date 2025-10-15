@@ -83,7 +83,7 @@ public class App {
 
 	}
 
-	@Bean
+	/*@Bean
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurer() {
 			@Override
@@ -95,7 +95,7 @@ public class App {
 						.allowCredentials(true);
 			}
 		};
-	}	
+	}*/
 
 	/*private static ManagedChannel newGrpcConnection() throws IOException {
 		var credentials = TlsChannelCredentials.newBuilder()

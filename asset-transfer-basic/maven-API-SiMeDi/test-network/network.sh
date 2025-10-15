@@ -19,7 +19,7 @@
 
 ROOTDIR=$(cd "$(dirname "$0")" && pwd)
 export PATH=${ROOTDIR}/../bin:${PWD}/../bin:$PATH
-export FABRIC_CFG_PATH=${PWD}/configtx
+#export FABRIC_CFG_PATH=${PWD}/configtx
 export VERBOSE=false
 
 # push to the required directory & set a trap to go back if needed
@@ -63,7 +63,7 @@ function checkPrereqs() {
   ## Check if your have cloned the peer binaries and configuration files.
   peer version > /dev/null 2>&1
 
-  if [[ $? -ne 0 || ! -d "../config" ]]; then
+  if [[ $? -ne 0 || ! -d "$FABRIC_CFG_PATH" ]]; then
     errorln "Peer binary and configuration files not found.."
     errorln
     errorln "Follow the instructions in the Fabric docs to install the Fabric Binaries:"
@@ -371,7 +371,7 @@ function packageChaincode() {
 ## Call the script to list installed and committed chaincode on a peer
 function listChaincode() {
 
-  export FABRIC_CFG_PATH=${PWD}/../config
+  #export FABRIC_CFG_PATH=${PWD}/../config
 
   . scripts/envVar.sh
   . scripts/ccutils.sh
@@ -389,7 +389,7 @@ function listChaincode() {
 ## Call the script to invoke 
 function invokeChaincode() {
 
-  export FABRIC_CFG_PATH=${PWD}/../config
+  #export FABRIC_CFG_PATH=${PWD}/../config
 
   . scripts/envVar.sh
   . scripts/ccutils.sh
@@ -403,7 +403,7 @@ function invokeChaincode() {
 ## Call the script to query chaincode 
 function queryChaincode() {
 
-  export FABRIC_CFG_PATH=${PWD}/../config
+  #export FABRIC_CFG_PATH=${PWD}/../config
   
   . scripts/envVar.sh
   . scripts/ccutils.sh
@@ -625,7 +625,7 @@ if [[ $BFT -eq 1 && "$CRYPTO" == "Certificate Authorities" ]]; then
 fi
 
 if [ $BFT -eq 1 ]; then
-  export FABRIC_CFG_PATH=${PWD}/bft-config
+  #export FABRIC_CFG_PATH=${PWD}/bft-config
   COMPOSE_FILE_BASE=compose-bft-test-net.yaml
 fi
 

@@ -68,6 +68,8 @@ The Fabric test network is used to deploy and run this sample. Follow these step
      
      CouchDb:
      ./network.sh deployCC -ccn basic -ccv 1.0 -ccp ../asset-transfer-basic/chaincode-go -ccl go
+
+     ./network.sh deployCC -ccn basic -ccv 1.0 -ccp ../../chaincode-go -ccl go
      ```
 
    - To deploy the **Java** chaincode implementation:
