@@ -18,8 +18,11 @@
 # this script is actually in and infer location from there. (putting first)
 
 ROOTDIR=$(cd "$(dirname "$0")" && pwd)
-export PATH=${ROOTDIR}/../bin:${PWD}/../bin:$PATH
+#export PATH=${ROOTDIR}/../bin:${PWD}/../bin:$PATH
 #export FABRIC_CFG_PATH=${PWD}/configtx
+export PATH=$HOME/fabric-samples/bin:$PATH
+export FABRIC_CFG_PATH=$HOME/fabric-samples/config
+
 export VERBOSE=false
 
 # push to the required directory & set a trap to go back if needed
