@@ -9,7 +9,7 @@ import com.code.hyperledger.models.VacunaDto;
 import com.code.hyperledger.models.Vacuna;
 import com.code.hyperledger.services.VacunaService;
 
-import main.java.com.code.hyperledger.models.ResultadoPaginado;
+import com.code.hyperledger.models.ResultadoPaginado;
 
 import org.hyperledger.fabric.client.*;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -11,7 +11,7 @@ import io.grpc.Grpc;
 import io.grpc.ManagedChannel;
 import io.grpc.TlsChannelCredentials;
 import lombok.SneakyThrows;
-import main.java.com.code.hyperledger.models.ResultadoPaginado;
+import com.code.hyperledger.models.ResultadoPaginado;
 
 import org.hyperledger.fabric.client.*;
 import org.hyperledger.fabric.client.identity.*;

@@ -5,9 +5,8 @@ import com.code.hyperledger.models.AssetIdDto;
 import com.code.hyperledger.models.Receta;
 import com.code.hyperledger.models.RecetaDto;
 import com.code.hyperledger.services.RecetaService;
-import main.java.com.code.hyperledger.models.ResultadoPaginado;
-
-import main.java.com.code.hyperledger.models.RecetaRequestDto;
+import com.code.hyperledger.models.ResultadoPaginado;
+import com.code.hyperledger.models.RecetaRequestDto;
 
 import org.hyperledger.fabric.client.*;
 import org.springframework.beans.factory.annotation.Autowired;
