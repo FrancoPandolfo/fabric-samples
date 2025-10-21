@@ -1,0 +1,35 @@
+# Archivo: fabric-samples/asset-transfer-basic/maven-API-SiMeDi/docker-compose.yaml
+
+version: '3.7'
+
+# Extiende el archivo de Fabric para incluir todos los servicios de la red (peers, orderers, CA)
+# Esto carga todos los componentes de Fabric.
+services:
+  # Servicio de la API de Java
+  api-java:
+    container_name: api-java-simedi
+    build:
+      context: . # El Dockerfile está en la carpeta actual
+      dockerfile: dockerfile
+    # Exponemos el puerto de la API
+    ports:
+      - "8080:8080"
+    # Montamos los certificados y MSPs que la API necesita para interactuar con Fabric
+    volumes:
+      - ./test-network/organizations:/app/organizations
+    # La API debe esperar a que los componentes clave de Fabric estén listos
+    #depends_on:
+    #  - peer0.org1.example.com
+    # Conecta la API a la misma red Docker que usa Fabric
+    networks:
+      - test
+
+# El archivo de Fabric define la red interna 'test'
+networks:
+  test:
+    name: fabric_test
+    external: true # Asume que la red 'fabric_test' se crea al iniciar la test-network (paso 3)
+
+# Extiende la configuración de Fabric
+# Usa 'include' (si estás en compose v3.7+) o 'extends' (versiones anteriores, pero más complejo)
+# La forma más simple es usar el comando 'docker-compose -f...'

@@ -1,12 +1,17 @@
-FROM eclipse-temurin:17-jdk
+# El Dockerfile está en: fabric-samples/asset-transfer-basic/maven-API-SiMeDi/
+
+FROM eclipse-temurin:11-jdk 
 WORKDIR /app
 
+# Asume que el JAR ya fue construido en 'target/'
 COPY target/main-0.0.1-SNAPSHOT.jar app.jar
-COPY test-network/organizations /app/organizations
+
+# Variables de entorno para la conexión a Fabric (usan los nombres de host de Docker Compose)
 ENV FABRIC_MSP_ID=Org1MSP
 ENV FABRIC_CHANNEL_NAME=mychannel
 ENV FABRIC_CHAINCODE_NAME=basic
-ENV FABRIC_PEER_ENDPOINT=fabric.mired.com:7051
+ENV FABRIC_PEER_ENDPOINT=peer0.org1.example.com:7051
 ENV FABRIC_OVERRIDE_AUTH=peer0.org1.example.com
 EXPOSE 8080
+
 ENTRYPOINT ["java", "-jar", "app.jar"]

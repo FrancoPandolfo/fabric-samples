@@ -36,6 +36,19 @@ Note that the asset transfer implemented by the smart contract is a simplified s
 
 The Fabric test network is used to deploy and run this sample. Follow these steps in order:
 
+Levantar hyperledger + api (en testing):
+(requiere comentar external: true en docker en el docker compose de la api)
+docker-compose \
+  -f docker-compose.yaml \
+  -f test-network/compose/compose-test-net.yaml \
+  -f test-network/compose/compose-couch.yaml \
+  up -d --build
+
+Luego configurar red:
+  cd test-network/
+  ./network.sh up createChannel -s couchdb
+  ./network.sh deployCC -ccn basic -ccv 1.0 -ccp ../../chaincode-go -ccl go
+
 1. Create the test network and a channel (from the `test-network` folder).
 
    ```
@@ -112,6 +125,9 @@ The Fabric test network is used to deploy and run this sample. Follow these step
      ```shell
      cd maven-API-SiMeDi
       ./mvnw spring-boot:run
+
+      con docker:
+      docker-compose up -d --build
      ```
 
 ## Clean up
