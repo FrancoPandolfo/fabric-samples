@@ -5,7 +5,6 @@ import com.code.hyperledger.models.AssetIdDto;
 import com.code.hyperledger.models.Receta;
 import com.code.hyperledger.models.RecetaDto;
 import com.code.hyperledger.services.RecetaService;
-import main.java.com.code.hyperledger.models.ResultadoPaginado;
 
 import main.java.com.code.hyperledger.models.RecetaRequestDto;
 
@@ -35,10 +34,24 @@ public class RecetaController {
 
     @PostMapping("/crear")
     public ResponseEntity<AssetIdDto> crear(@RequestBody Receta receta) {
+        System.out.println("\n--> Submit Transaction: CrearReceta");
+
+        // Log para verificar los valores iniciales
+        System.out.println("Receta recibida: " + receta);
+
         String now = LocalDateTime.now().toString();
         String dni = receta.getPatientDocumentNumber();
+
+        // Log para ver el DNI y el timestamp
+        System.out.println("DNI del paciente: " + dni);
+        System.out.println("Timestamp actual: " + now);
+
         String id = dni + now;
         String assetId = Hashing.sha256(id);
+
+        // Log para ver el ID generado
+        System.out.println("ID generado para el asset: " + assetId);
+
         receta.setId(assetId);
 
         AssetIdDto assetIdDto = new AssetIdDto();
@@ -46,9 +59,17 @@ public class RecetaController {
         assetIdDto.setTimeStamp(now);
 
         try {
+            // Log antes de intentar cargar la receta
+            System.out.println("Intentando cargar la receta...");
+
             recetaService.cargarReceta(receta);
+
+            // Log después de que la receta fue cargada
+            System.out.println("Receta cargada correctamente.");
+
             return new ResponseEntity<>(assetIdDto, HttpStatus.OK);
         } catch (CommitStatusException | EndorseException | CommitException | SubmitException e) {
+            // Log de error
             System.err.println("Error al cargar la receta: " + e.getMessage());
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -57,27 +78,35 @@ public class RecetaController {
 
     @PostMapping("/obtener")
     public ResponseEntity<RecetaDto> find(@RequestBody RecetaRequestDto requestBody) {
-        logger.info("Received request to obtain receta with ID: {}", requestBody.getId()); 
+        logger.info("Received request to obtain receta with ID: {}", requestBody.getId()); // Log de entrada
 
         try {
             String id = requestBody.getId();
-            logger.debug("Searching for receta with ID: {}", id); 
+            logger.debug("Searching for receta with ID: {}", id); // Log de búsqueda
 
             Receta receta = recetaService.obtenerReceta(id);
-            logger.debug("Receta found: {}", receta);
+            logger.debug("Receta found: {}", receta); // Log cuando se encuentra la receta
 
             RecetaDto recetaDto = mapToDto(receta);
-            logger.info("Receta DTO created successfully for ID: {}", id); 
+            logger.info("Receta DTO created successfully for ID: {}", id); // Log de éxito
 
             return new ResponseEntity<>(recetaDto, HttpStatus.OK);
         } catch (IOException e) {
-            logger.error("IOException occurred while obtaining receta with ID: {}", requestBody.getId(), e);
+            logger.error("IOException occurred while obtaining receta with ID: {}", requestBody.getId(), e); // Log de
+                                                                                                             // excepción
+                                                                                                             // específica
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         } catch (GatewayException e) {
-            logger.error("GatewayException occurred while obtaining receta with ID: {}", requestBody.getId(), e);
+            logger.error("GatewayException occurred while obtaining receta with ID: {}", requestBody.getId(), e); // Log
+                                                                                                                  // de
+                                                                                                                  // excepción
+                                                                                                                  // Gateway
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while obtaining receta with ID: {}", requestBody.getId(), e); 
+            logger.error("Unexpected error occurred while obtaining receta with ID: {}", requestBody.getId(), e); // Log
+                                                                                                                  // de
+                                                                                                                  // error
+                                                                                                                  // inesperado
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -91,6 +120,10 @@ public class RecetaController {
             }
 
             List<Receta> recetas = recetaService.obtenerRecetasPorIds(ids);
+            for (Receta receta : recetas) {
+                System.out.println(" - " + receta.getId());
+            }
+
             List<RecetaDto> recetasDto = new ArrayList<>();
             for (Receta receta : recetas) {
                 recetasDto.add(mapToDto(receta));
@@ -99,6 +132,8 @@ public class RecetaController {
             System.out.println("Recetas obtenidas del service con los siguientes IDs:");
 
             return new ResponseEntity<>(recetasDto, HttpStatus.OK);
+
+            // 🔍 Log de los IDs obtenidos desde el service
 
         } catch (IOException | GatewayException e) {
             e.printStackTrace();
@@ -118,16 +153,20 @@ public class RecetaController {
             if (id == null || id.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
+
+            System.out.println("\n--> Submit Transaction: EntregarReceta");
+
             recetaService.entregarReceta(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (EndorseException | SubmitException | CommitStatusException | CommitException e) {
-            e.printStackTrace(); 
+            e.printStackTrace(); // o algún log específico
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (GatewayException e) {
-            e.printStackTrace(); 
+            e.printStackTrace(); // este bloque rara vez se ejecutaría si ya atrapás las anteriores
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            e.printStackTrace(); 
+        }
+        catch (Exception e) {
+            e.printStackTrace(); // este bloque rara vez se ejecutaría si ya atrapás las anteriores
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -147,20 +186,16 @@ public class RecetaController {
             recetaService.firmarReceta(id, signature);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (EndorseException | SubmitException | CommitStatusException | CommitException e) {
-            e.printStackTrace(); 
+            e.printStackTrace(); // o algún log específico
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (GatewayException e) {
-            e.printStackTrace(); 
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            e.printStackTrace(); 
+            e.printStackTrace(); // este bloque rara vez se ejecutaría si ya atrapás las anteriores
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    @GetMapping("/todasTest")
-    public List<Receta> obtenerTodasTest() throws Exception {
-        return recetaService.obtenerTodasLasRecetas();
+        catch (Exception e) {
+            e.printStackTrace(); // este bloque rara vez se ejecutaría si ya atrapás las anteriores
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PostMapping("/borrar")
@@ -171,32 +206,20 @@ public class RecetaController {
             if (id == null || id.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
+
+            System.out.println("\n--> Submit Transaction: BorrarReceta");
+
             recetaService.borrarReceta(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (EndorseException | SubmitException | CommitStatusException | CommitException e) {
-            e.printStackTrace();
+            e.printStackTrace(); // o algún log específico
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (GatewayException e) {
-            e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        } catch (Exception e) {
-            e.printStackTrace(); 
+            e.printStackTrace(); // este bloque rara vez se ejecutaría si ya atrapás las anteriores
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    @GetMapping("/obtener/paginado")
-    public ResponseEntity<ResultadoPaginado<RecetaDto>> obtenerRecetasPaginado(
-            @RequestParam String dni,
-            @RequestParam List<String> estados,
-            @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(defaultValue = "") String bookmark) {
-        try {
-            ResultadoPaginado<RecetaDto> recetas = recetaService
-                    .obtenerRecetasPorDniYEstadoPaginado(dni, estados, pageSize, bookmark);
-            return new ResponseEntity<>(recetas, HttpStatus.OK);
-        } catch (Exception e) {
-            e.printStackTrace();
+        catch (Exception e) {
+            e.printStackTrace(); // este bloque rara vez se ejecutaría si ya atrapás las anteriores
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
