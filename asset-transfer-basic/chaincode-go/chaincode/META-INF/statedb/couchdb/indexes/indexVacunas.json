@@ -1,6 +1,6 @@
 {
   "index": {
-    "fields": ["patientDocumentNumber", "status"]
+    "fields": ["patientDocumentNumber"]
   },
   "ddoc": "vacunas-index",
   "name": "indexVacunas",
