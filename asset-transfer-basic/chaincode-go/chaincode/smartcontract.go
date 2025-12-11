@@ -535,12 +535,16 @@ func (s *SmartContract) GetVacunasPorDniPaginado(
 	}
 
 	query := map[string]interface{}{
-		"selector": map[string]interface{}{
-			"patientDocumentNumber": dni,
-		},
-		//"use_index": []string{"vacunas-index", "indexVacunas"},
-		"limit": pageSize,
-	}
+        "selector": map[string]interface{}{
+            "patientDocumentNumber": dni,
+            // Filtramos por un campo que SOLO tienen las vacunas.
+            // Si el documento tiene "vaccinateCode", CouchDB sabe que es una vacuna.
+            "vaccinateCode": map[string]interface{}{
+                "$exists": true,
+            },
+        },
+        "limit": pageSize,
+    }
 	if bookmark != "" {
 		query["bookmark"] = bookmark
 	}
