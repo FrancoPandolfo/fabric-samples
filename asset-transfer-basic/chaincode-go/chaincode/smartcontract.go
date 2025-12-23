@@ -127,6 +127,55 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 		}
 	}
 
+	vacunas := []Vacuna{
+		{
+			ID:                         "vacuna1",
+			Identifier:                 "vac1234",
+			Status:                     "administered",
+			StatusChange:               "2024-03-01T09:00:00Z",
+			StatusReason:               "completed",
+			VaccinateCode:              "COVID19",
+			AdministradedProduct:       "Pfizer",
+			Manufacturer:               "Pfizer Inc.",
+			LotNumber:                  "PF123456",
+			ExpirationDate:             "2025-01-01",
+			PatientDocumentNumber:      "12345678",
+			Reactions:                  "none",
+			Practitioner:               "Dr. Smith",
+			PractitionerDocumentNumber: "987654321",
+			Matricula:                  "matricula789",
+		},
+		{
+			ID:                         "vacuna2",
+			Identifier:                 "vac1235",
+			Status:                     "administered",
+			StatusChange:               "2024-03-05T10:00:00Z",
+			StatusReason:               "completed",
+			VaccinateCode:              "FLU",
+			AdministradedProduct:       "Vaxigrip",
+			Manufacturer:               "Sanofi",
+			LotNumber:                  "SF654321",
+			ExpirationDate:             "2024-12-31",
+			PatientDocumentNumber:      "87654321",
+			Reactions:                  "mild fever",
+			Practitioner:               "Dr. Jones",
+			PractitionerDocumentNumber: "123123123",
+			Matricula:                  "matricula321",
+		},
+	}
+
+	for _, vacuna := range vacunas {
+		vacunaJSON, err := json.Marshal(vacuna)
+		if err != nil {
+			return err
+		}
+
+		err = ctx.GetStub().PutState(vacuna.ID, vacunaJSON)
+		if err != nil {
+			return fmt.Errorf("error al guardar vacuna en el ledger: %v", err)
+		}
+	}
+
 	return nil
 }
 
@@ -486,13 +535,16 @@ func (s *SmartContract) GetVacunasPorDniPaginado(
 	}
 
 	query := map[string]interface{}{
-		"selector": map[string]interface{}{
-			"patientDocumentNumber": dni,
-		},
-		// primero probamos sin use_index
-		//	"use_index": []string{"vacunas-index", "indexVacunas"},
-		"limit": pageSize,
-	}
+        "selector": map[string]interface{}{
+            "patientDocumentNumber": dni,
+            // Filtramos por un campo que SOLO tienen las vacunas.
+            // Si el documento tiene "vaccinateCode", CouchDB sabe que es una vacuna.
+            "vaccinateCode": map[string]interface{}{
+                "$exists": true,
+            },
+        },
+        "limit": pageSize,
+    }
 	if bookmark != "" {
 		query["bookmark"] = bookmark
 	}

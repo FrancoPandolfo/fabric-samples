@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.SneakyThrows;
-import main.java.com.code.hyperledger.models.ResultadoPaginado;
+import com.code.hyperledger.models.ResultadoPaginado;
 
 import org.hyperledger.fabric.client.*;
 import org.hyperledger.fabric.client.identity.*;

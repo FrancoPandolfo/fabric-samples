@@ -1,4 +1,4 @@
-package main.java.com.code.hyperledger;
+package com.code.hyperledger;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
