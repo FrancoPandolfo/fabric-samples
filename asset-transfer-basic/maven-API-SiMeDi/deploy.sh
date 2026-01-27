@@ -57,6 +57,6 @@ fi
 # 5. Levantar Java API
 cd ..
 echo "--- Reiniciando Java API ---"
-docker-compose up -d --build
+docker compose up -d --build
 
 echo "sDespliegue Exitoso: v$NEXT_VERSION (Seq $NEXT_SEQ)"
