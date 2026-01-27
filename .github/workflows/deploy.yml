@@ -26,18 +26,8 @@ jobs:
             # 3. Dar permisos de ejecución
             chmod +x deploy.sh
             
-            # 4. CALCULAR SECUENCIA Y VERSIÓN
-            # Hyperledger exige que la secuencia suba estrictamente de 1 en 1.
-            # Como tu red pide la secuencia 2, y GitHub va por ejecuciones bajas,
-            # usamos el número directo (OFFSET 0) para intentar alinearlos.
+            # 4. Ejecutar el script INTELIGENTE
+            # Ya no calculamos nada aquí. Solo le decimos la versión base "1.0".
+            # El script deploy.sh averiguará solo si toca la secuencia 2, 3, 4, etc.
             
-            OFFSET=0
-            SEQ=$(( ${{ github.run_number }} + $OFFSET ))
-            VER="1.0.$SEQ"
-            
-            echo "--- Iniciando Deploy Automático ---"
-            echo "GitHub Run: ${{ github.run_number }} | Offset: $OFFSET"
-            echo "Target Sequence: $SEQ | Target Version: $VER"
-            
-            # 5. Ejecutar el script con los valores calculados
-            ./deploy.sh "$VER" "$SEQ"
+            ./deploy.sh "1.0"
