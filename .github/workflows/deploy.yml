@@ -26,9 +26,17 @@ jobs:
             # 3. Dar permisos de ejecución
             chmod +x deploy.sh
             
-            # 4. Ejecutar el script con VERSIONADO AUTOMÁTICO
-            # Usamos el número de ejecución de GitHub para generar una secuencia única
-            # Esto evita el error "ENDORSEMENT_POLICY_FAILURE"
+            # 4. CALCULAR SECUENCIA Y VERSIÓN
+            # Sumamos 10 al run_number para saltar las versiones viejas (1, 2...) que ya usaste.
+            # Ejemplo: Si github run es 2, la secuencia será 12.
             
-            echo "Ejecutando deploy secuencia: ${{ github.run_number }}"
-            ./deploy.sh "1.0.${{ github.run_number }}" "${{ github.run_number }}"
+            OFFSET=10
+            SEQ=$(( ${{ github.run_number }} + $OFFSET ))
+            VER="1.0.$SEQ"
+            
+            echo "--- Iniciando Deploy Automático ---"
+            echo "GitHub Run: ${{ github.run_number }} | Offset: $OFFSET"
+            echo "Target Sequence: $SEQ | Target Version: $VER"
+            
+            # 5. Ejecutar el script con los valores calculados
+            ./deploy.sh "$VER" "$SEQ"
