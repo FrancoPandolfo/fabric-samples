@@ -27,10 +27,11 @@ jobs:
             chmod +x deploy.sh
             
             # 4. CALCULAR SECUENCIA Y VERSIÓN
-            # Sumamos 10 al run_number para saltar las versiones viejas (1, 2...) que ya usaste.
-            # Ejemplo: Si github run es 2, la secuencia será 12.
+            # Hyperledger exige que la secuencia suba estrictamente de 1 en 1.
+            # Como tu red pide la secuencia 2, y GitHub va por ejecuciones bajas,
+            # usamos el número directo (OFFSET 0) para intentar alinearlos.
             
-            OFFSET=10
+            OFFSET=0
             SEQ=$(( ${{ github.run_number }} + $OFFSET ))
             VER="1.0.$SEQ"
             
