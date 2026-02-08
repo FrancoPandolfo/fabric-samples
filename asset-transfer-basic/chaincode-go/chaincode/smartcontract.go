@@ -33,28 +33,29 @@ type Receta struct {
 	Practitioner               string `json:"practitioner"`
 	PractitionerDocumentNumber string `json:"practitionerDocumentNumber"`
 	Signature                  string `json:"signature"`
-	Matricula				   string `json:"matricula"`
+	Matricula                  string `json:"matricula"`
 }
 
 type Vacuna struct {
-	ID                         string `json:"id"` // identificador único para el ledger
+	ID                         string `json:"id"`
 	Identifier                 string `json:"identifier"`
-	Status                     string `json:"status"`       // podés validarlo con enums si querés
-	StatusChange               string `json:"statusChange"` // como string (ISO8601)
+	Status                     string `json:"status"`
+	StatusChange               string `json:"statusChange"`
 	StatusReason               string `json:"statusReason"`
 	VaccinateCode              string `json:"vaccinateCode"`
 	AdministradedProduct       string `json:"administradedProduct"`
 	Manufacturer               string `json:"manufacturer"`
 	LotNumber                  string `json:"lotNumber"`
-	ExpirationDate             string `json:"expirationDate"` // como string ISO8601
+	ExpirationDate             string `json:"expirationDate"`
 	PatientDocumentNumber      string `json:"patientDocumentNumber"`
-	Reactions                  string `json:"reactions"` // puede ser un string o una estructura si querés después
+	Reactions                  string `json:"reactions"`
 	Practitioner               string `json:"practitioner"`
 	PractitionerDocumentNumber string `json:"practitionerDocumentNumber"`
-	Matricula				   string `json:"matricula"`
+	Matricula                  string `json:"matricula"`
 }
 
 type Estado string
+
 const (
 	EstadoDraft     Estado = "draft"
 	EstadoActive    Estado = "active"
@@ -126,6 +127,55 @@ func (s *SmartContract) InitLedger(ctx contractapi.TransactionContextInterface) 
 		}
 	}
 
+	vacunas := []Vacuna{
+		{
+			ID:                         "vacuna1",
+			Identifier:                 "vac1234",
+			Status:                     "administered",
+			StatusChange:               "2024-03-01T09:00:00Z",
+			StatusReason:               "completed",
+			VaccinateCode:              "COVID19",
+			AdministradedProduct:       "Pfizer",
+			Manufacturer:               "Pfizer Inc.",
+			LotNumber:                  "PF123456",
+			ExpirationDate:             "2025-01-01",
+			PatientDocumentNumber:      "12345678",
+			Reactions:                  "none",
+			Practitioner:               "Dr. Smith",
+			PractitionerDocumentNumber: "987654321",
+			Matricula:                  "matricula789",
+		},
+		{
+			ID:                         "vacuna2",
+			Identifier:                 "vac1235",
+			Status:                     "administered",
+			StatusChange:               "2024-03-05T10:00:00Z",
+			StatusReason:               "completed",
+			VaccinateCode:              "FLU",
+			AdministradedProduct:       "Vaxigrip",
+			Manufacturer:               "Sanofi",
+			LotNumber:                  "SF654321",
+			ExpirationDate:             "2024-12-31",
+			PatientDocumentNumber:      "87654321",
+			Reactions:                  "mild fever",
+			Practitioner:               "Dr. Jones",
+			PractitionerDocumentNumber: "123123123",
+			Matricula:                  "matricula321",
+		},
+	}
+
+	for _, vacuna := range vacunas {
+		vacunaJSON, err := json.Marshal(vacuna)
+		if err != nil {
+			return err
+		}
+
+		err = ctx.GetStub().PutState(vacuna.ID, vacunaJSON)
+		if err != nil {
+			return fmt.Errorf("error al guardar vacuna en el ledger: %v", err)
+		}
+	}
+
 	return nil
 }
 
@@ -137,12 +187,10 @@ func (s *SmartContract) CreateReceta(ctx contractapi.TransactionContextInterface
 	if exists {
 		return fmt.Errorf("la receta %s ya existe", receta.ID)
 	}
-
 	recetaJSON, err := json.Marshal(receta)
 	if err != nil {
 		return err
 	}
-
 	return ctx.GetStub().PutState(receta.ID, recetaJSON)
 }
 
@@ -175,7 +223,6 @@ func (s *SmartContract) FirmarReceta(ctx contractapi.TransactionContextInterface
 	if err != nil {
 		return fmt.Errorf("error al serializar la receta firmada: %v", err)
 	}
-
 	return ctx.GetStub().PutState(recetaID, updatedRecetaJSON)
 }
 
@@ -187,8 +234,6 @@ func (s *SmartContract) EntregarReceta(ctx contractapi.TransactionContextInterfa
 	if !exists {
 		return fmt.Errorf("la receta %s no existe", recetaID)
 	}
-
-	// Obtener la receta actual
 	recetaActualJSON, err := ctx.GetStub().GetState(recetaID)
 	if err != nil {
 		return fmt.Errorf("error al obtener la receta actual: %v", err)
@@ -196,25 +241,18 @@ func (s *SmartContract) EntregarReceta(ctx contractapi.TransactionContextInterfa
 	if recetaActualJSON == nil {
 		return fmt.Errorf("la receta %s no fue encontrada en el ledger", recetaID)
 	}
-
 	var recetaActual Receta
 	if err := json.Unmarshal(recetaActualJSON, &recetaActual); err != nil {
 		return fmt.Errorf("error al parsear la receta actual: %v", err)
 	}
-
 	if recetaActual.Status != string(EstadoActive) {
 		return fmt.Errorf("solo se puede entregar la receta si está en estado 'active'")
 	}
-
-	// Cambiar el estado a ENTREGADO
 	recetaActual.Status = string(EstadoCompleted)
-
-	// Guardar la receta modificada
 	updatedRecetaJSON, err := json.Marshal(recetaActual)
 	if err != nil {
 		return fmt.Errorf("error al serializar la receta modificada: %v", err)
 	}
-
 	return ctx.GetStub().PutState(recetaID, updatedRecetaJSON)
 }
 
@@ -314,17 +352,17 @@ func (s *SmartContract) GetAllRecetas(ctx contractapi.TransactionContextInterfac
 		}
 
 		if len(queryResponse.Value) == 0 {
-			continue // Ignorar valores vacíos
+			continue
 		}
 
 		var receta Receta
 		err = json.Unmarshal(queryResponse.Value, &receta)
 		if err != nil {
-			continue // O podrías loggear el error si es útil
+			continue
 		}
 
 		if receta.Status == string(EstadoCancelled) {
-			continue // Ignorar recetas canceladas
+			continue
 		}
 
 		recetas = append(recetas, &receta)
@@ -352,7 +390,7 @@ func (s *SmartContract) GetMultipleRecetas(ctx contractapi.TransactionContextInt
 
 		status := strings.ToLower(strings.TrimSpace(receta.Status))
 		if status == string(EstadoCancelled) {
-			continue // Ignorar receta cancelada
+			continue
 		}
 
 		recetas = append(recetas, &receta)
@@ -360,37 +398,63 @@ func (s *SmartContract) GetMultipleRecetas(ctx contractapi.TransactionContextInt
 	return recetas, nil
 }
 
-// TODO: adaptar los campos para que se tengan un identificar de usuarios ademas del DNI
-func (s *SmartContract) GetRecetasPorDniYEstado(ctx contractapi.TransactionContextInterface, dni string, estado string) ([]*Receta, error) {
-	if dni == "" || estado == "" {
-		return nil, fmt.Errorf("el dni y el estado son obligatorios")
-	}
+type ResultadoPaginado struct {
+	Recetas  []*Receta `json:"componentes"`
+	Bookmark string    `json:"bookmark"`
+}
 
-	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
+func (s *SmartContract) GetRecetasPorDniYEstadosPaginado(
+	ctx contractapi.TransactionContextInterface,
+	dni string,
+	estados []string,
+	pageSize int32,
+	bookmark string,
+) (*ResultadoPaginado, error) {
+	if dni == "" || len(estados) == 0 {
+		return nil, fmt.Errorf("el dni y al menos un estado son obligatorios")
+	}
+	query := map[string]interface{}{
+		"selector": map[string]interface{}{
+			"patientDocumentNumber": dni,
+			"status": map[string]interface{}{
+				"$in": estados,
+			},
+		},
+		"limit": pageSize,
+	}
+	if bookmark != "" {
+		query["bookmark"] = bookmark
+	}
+	queryBytes, err := json.Marshal(query)
 	if err != nil {
-		return nil, fmt.Errorf("error al obtener datos del ledger: %v", err)
+		return nil, fmt.Errorf("error al generar la query: %v", err)
+	}
+	resultsIterator, metadata, err := ctx.GetStub().GetQueryResultWithPagination(string(queryBytes), pageSize, bookmark)
+	if err != nil {
+		return nil, fmt.Errorf("error al ejecutar la query: %v", err)
 	}
 	defer resultsIterator.Close()
-
-	var recetasFiltradas []*Receta
+	var recetas []*Receta
 	for resultsIterator.HasNext() {
-		queryResponse, err := resultsIterator.Next()
-		if err != nil {
-			return nil, err
+		response, iterErr := resultsIterator.Next()
+		if iterErr != nil {
+			return nil, iterErr
 		}
-
 		var receta Receta
-		err = json.Unmarshal(queryResponse.Value, &receta)
-		if err != nil {
-			return nil, err
+		if err := json.Unmarshal(response.Value, &receta); err != nil {
+			return nil, fmt.Errorf("error al parsear receta: %v", err)
 		}
 
-		if receta.PatientDocumentNumber == dni && receta.Status == estado {
-			recetasFiltradas = append(recetasFiltradas, &receta)
-		}
+		recetas = append(recetas, &receta)
 	}
-
-	return recetasFiltradas, nil
+	if recetas == nil {
+		recetas = []*Receta{}
+	}
+	resultado := &ResultadoPaginado{
+		Recetas:  recetas,
+		Bookmark: metadata.Bookmark,
+	}
+	return resultado, nil
 }
 
 func (s *SmartContract) CreateVacuna(ctx contractapi.TransactionContextInterface, vacuna Vacuna) error {
@@ -401,7 +465,6 @@ func (s *SmartContract) CreateVacuna(ctx contractapi.TransactionContextInterface
 	if exists {
 		return fmt.Errorf("la vacuna %s ya existe", vacuna.ID)
 	}
-
 	vacunaJSON, err := json.Marshal(vacuna)
 	if err != nil {
 		return err
@@ -426,7 +489,6 @@ func (s *SmartContract) ReadVacuna(ctx contractapi.TransactionContextInterface, 
 	if vacunaJSON == nil {
 		return nil, fmt.Errorf("la vacuna %s no existe", id)
 	}
-
 	var vacuna Vacuna
 	err = json.Unmarshal(vacunaJSON, &vacuna)
 	if err != nil {
@@ -446,7 +508,6 @@ func (s *SmartContract) GetMultipleVacunas(ctx contractapi.TransactionContextInt
 		if vacunaJSON == nil {
 			continue
 		}
-
 		var vacuna Vacuna
 		err = json.Unmarshal(vacunaJSON, &vacuna)
 		if err != nil {
@@ -457,11 +518,72 @@ func (s *SmartContract) GetMultipleVacunas(ctx contractapi.TransactionContextInt
 	return vacunas, nil
 }
 
-func (s *SmartContract) GetVacunasPorDniYEstado(ctx contractapi.TransactionContextInterface, dni string, estado string) ([]*Vacuna, error) {
+type ResultadoPaginadoVacunas struct {
+	Vacunas  []*Vacuna `json:"componentes"`
+	Bookmark string    `json:"bookmark"`
+}
+
+func (s *SmartContract) GetVacunasPorDniPaginado(
+	ctx contractapi.TransactionContextInterface,
+	dni string,
+	pageSize int32,
+	bookmark string,
+) (*ResultadoPaginadoVacunas, error) {
+
 	if dni == "" {
 		return nil, fmt.Errorf("el dni es obligatorio")
 	}
 
+	query := map[string]interface{}{
+        "selector": map[string]interface{}{
+            "patientDocumentNumber": dni,
+            // Filtramos por un campo que SOLO tienen las vacunas.
+            // Si el documento tiene "vaccinateCode", CouchDB sabe que es una vacuna.
+            "vaccinateCode": map[string]interface{}{
+                "$exists": true,
+            },
+        },
+        "limit": pageSize,
+    }
+	if bookmark != "" {
+		query["bookmark"] = bookmark
+	}
+	queryBytes, err := json.Marshal(query)
+	if err != nil {
+		return nil, fmt.Errorf("error al generar la query: %v", err)
+	}
+	resultsIterator, metadata, err := ctx.GetStub().GetQueryResultWithPagination(string(queryBytes), pageSize, bookmark)
+	if err != nil {
+		return nil, fmt.Errorf("error al ejecutar la query: %v", err)
+	}
+	defer resultsIterator.Close()
+	var vacunas []*Vacuna
+	for resultsIterator.HasNext() {
+		response, iterErr := resultsIterator.Next()
+		if iterErr != nil {
+			return nil, iterErr
+		}
+		var vacuna Vacuna
+		if err := json.Unmarshal(response.Value, &vacuna); err != nil {
+			return nil, fmt.Errorf("error al parsear vacuna: %v", err)
+		}
+		vacunas = append(vacunas, &vacuna)
+	}
+	if vacunas == nil {
+		vacunas = []*Vacuna{}
+	}
+	resultado := &ResultadoPaginadoVacunas{
+		Vacunas:  vacunas,
+		Bookmark: metadata.Bookmark,
+	}
+
+	return resultado, nil
+}
+
+func (s *SmartContract) GetVacunasPorDniYEstado(ctx contractapi.TransactionContextInterface, dni string, estado string) ([]*Vacuna, error) {
+	if dni == "" {
+		return nil, fmt.Errorf("el dni es obligatorio")
+	}
 	resultsIterator, err := ctx.GetStub().GetStateByRange("", "")
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener datos del ledger: %v", err)
@@ -474,23 +596,16 @@ func (s *SmartContract) GetVacunasPorDniYEstado(ctx contractapi.TransactionConte
 		if err != nil {
 			return nil, err
 		}
-
 		var vacuna Vacuna
-		// Solo deserializamos si es posible (podría fallar si no es una vacuna)
 		if err := json.Unmarshal(queryResponse.Value, &vacuna); err != nil {
 			continue
 		}
-
-		// Validamos que tenga un DNI y coincida
 		if vacuna.PatientDocumentNumber != dni {
 			continue
 		}
-
-		// Si se pasó un estado, lo filtramos
 		if estado != "" && vacuna.Status != estado {
 			continue
 		}
-
 		vacunasFiltradas = append(vacunasFiltradas, &vacuna)
 	}
 

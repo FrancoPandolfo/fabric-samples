@@ -8,6 +8,9 @@ import com.code.hyperledger.models.Vacuna;
 import com.code.hyperledger.models.VacunaDto;
 import com.code.hyperledger.models.Vacuna;
 import com.code.hyperledger.services.VacunaService;
+
+import com.code.hyperledger.models.ResultadoPaginado;
+
 import org.hyperledger.fabric.client.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +32,7 @@ public class VacunaController {
 
     @PostMapping("/crear")
     public ResponseEntity<AssetIdDto> crearVacuna(@RequestBody Vacuna vacuna) {
+
         System.out.println("\n--> Submit Transaction: CrearVacuna");
 
         // Validación básica
@@ -39,6 +43,7 @@ public class VacunaController {
 
         String now = LocalDateTime.now().toString();
         String dni = vacuna.getPatientDocumentNumber();
+    
 
         System.out.println("Vacuna recibida: " + vacuna);
         System.out.println("DNI del paciente: " + dni);
@@ -46,6 +51,7 @@ public class VacunaController {
 
         String id = dni + now;
         String assetId = Hashing.sha256(id);
+    
 
         System.out.println("ID generado para el asset: " + assetId);
 
@@ -56,13 +62,15 @@ public class VacunaController {
         assetIdDto.setTimeStamp(now);
 
         try {
+    
             System.out.println("Intentando registrar la vacuna..." + vacuna);
             vacunaService.cargarVacuna(vacuna);
+    
             System.out.println("Vacuna registrada correctamente.");
             return new ResponseEntity<>(assetIdDto, HttpStatus.OK);
 
         } catch (CommitStatusException | EndorseException | CommitException | SubmitException e) {
-            System.err.println("Error al registrar la vacuna: " + e.getMessage());
+            
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 
@@ -128,17 +136,17 @@ public class VacunaController {
         }
     }
 
-    @PostMapping("/filtrar")
-    public ResponseEntity<List<Vacuna>> obtenerVacunasPorDniYEstado(@RequestBody Map<String, String> filtros) {
+    @GetMapping("/obtener/paginado")
+    public ResponseEntity<ResultadoPaginado<Vacuna>> obtenerVacunasPorDniPaginado(
+            @RequestParam String dni,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "") String bookmark) {
         try {
-            String dni = filtros.get("dni");
-            String estado = filtros.get("estado"); // puede venir null o vacío
-
             if (dni == null || dni.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
 
-            List<Vacuna> vacunas = vacunaService.obtenerVacunasPorDniYEstado(dni, estado);
+            ResultadoPaginado<Vacuna> vacunas = vacunaService.obtenerVacunasPorDniPaginado(dni, pageSize, bookmark);
             return new ResponseEntity<>(vacunas, HttpStatus.OK);
         } catch (IOException | GatewayException e) {
             e.printStackTrace();

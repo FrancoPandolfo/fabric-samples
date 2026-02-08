@@ -1,0 +1,33 @@
+name: Deploy Hyperledger & Java API
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            # 1. Ir a la carpeta raíz del proyecto en el servidor
+            cd ./fabric-samples/asset-transfer-basic/maven-API-SiMeDi
+            
+            # 2. Descargar el código nuevo
+            echo "Descargando cambios desde git..."
+            git pull origin main
+            
+            # 3. Dar permisos de ejecución
+            chmod +x deploy.sh
+            
+            # 4. Ejecutar el script INTELIGENTE
+            # Ya no calculamos nada aquí. Solo le decimos la versión base "1.0".
+            # El script deploy.sh averiguará solo si toca la secuencia 2, 3, 4, etc.
+            
+            ./deploy.sh "1.0"

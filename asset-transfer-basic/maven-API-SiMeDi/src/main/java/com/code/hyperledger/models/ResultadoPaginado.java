@@ -1,4 +1,4 @@
-/*package com.code.hyperledger.models;
+package com.code.hyperledger.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,7 +10,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ResultadoPaginado<T> {
-    private List<T> recetas;
+    private List<T> componentes;
     private String bookmark;
 }
-*/
