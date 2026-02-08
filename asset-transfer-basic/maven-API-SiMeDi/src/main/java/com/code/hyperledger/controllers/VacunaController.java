@@ -33,34 +33,27 @@ public class VacunaController {
     @PostMapping("/crear")
     public ResponseEntity<AssetIdDto> crearVacuna(@RequestBody Vacuna vacuna) {
 
-        if (vacuna == null || vacuna.getPatientDocumentNumber() == null || vacuna.getPatientDocumentNumber().isEmpty()) {
+        if (vacuna == null || vacuna.getPatientDocumentNumber() == null
+                || vacuna.getPatientDocumentNumber().isEmpty()) {
             System.err.println("Datos de vacuna inválidos: faltan campos requeridos.");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-    
         String now = LocalDateTime.now().toString();
         String dni = vacuna.getPatientDocumentNumber();
-    
         String id = dni + now;
         String assetId = Hashing.sha256(id);
-    
         vacuna.setId(assetId);
-    
         AssetIdDto assetIdDto = new AssetIdDto();
         assetIdDto.setDni(dni);
         assetIdDto.setTimeStamp(now);
-    
         try {
-    
             vacunaService.cargarVacuna(vacuna);
-    
             return new ResponseEntity<>(assetIdDto, HttpStatus.OK);
         } catch (CommitStatusException | EndorseException | CommitException | SubmitException e) {
-            
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-    }    
+    }
 
     @PostMapping("/obtener")
     public ResponseEntity<Vacuna> obtenerVacuna(@RequestBody Map<String, String> requestBody) {
@@ -73,6 +66,7 @@ public class VacunaController {
             Vacuna vacuna = vacunaService.obtenerVacuna(id);
             return new ResponseEntity<>(vacuna, HttpStatus.OK);
         } catch (IOException | GatewayException e) {
+            System.err.println("Error al registrar la vacuna: " + e.getMessage());
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         }
@@ -128,7 +122,7 @@ public class VacunaController {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     private VacunaDto mapToDto(Vacuna vacuna) {
         VacunaDto dto = new VacunaDto();
         dto.setIdentificador(vacuna.getIdentifier());
@@ -148,5 +142,4 @@ public class VacunaController {
 
         return dto;
     }
-    
 }

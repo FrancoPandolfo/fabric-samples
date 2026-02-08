@@ -56,17 +56,17 @@ public class RecetaController {
 
     @PostMapping("/obtener")
     public ResponseEntity<RecetaDto> find(@RequestBody RecetaRequestDto requestBody) {
-        logger.info("Received request to obtain receta with ID: {}", requestBody.getId()); 
+        logger.info("Received request to obtain receta with ID: {}", requestBody.getId());
 
         try {
             String id = requestBody.getId();
-            logger.debug("Searching for receta with ID: {}", id); 
+            logger.debug("Searching for receta with ID: {}", id);
 
             Receta receta = recetaService.obtenerReceta(id);
             logger.debug("Receta found: {}", receta);
 
             RecetaDto recetaDto = mapToDto(receta);
-            logger.info("Receta DTO created successfully for ID: {}", id); 
+            logger.info("Receta DTO created successfully for ID: {}", id);
 
             return new ResponseEntity<>(recetaDto, HttpStatus.OK);
         } catch (IOException e) {
@@ -76,7 +76,7 @@ public class RecetaController {
             logger.error("GatewayException occurred while obtaining receta with ID: {}", requestBody.getId(), e);
             return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
         } catch (Exception e) {
-            logger.error("Unexpected error occurred while obtaining receta with ID: {}", requestBody.getId(), e); 
+            logger.error("Unexpected error occurred while obtaining receta with ID: {}", requestBody.getId(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -120,13 +120,13 @@ public class RecetaController {
             recetaService.entregarReceta(id);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (EndorseException | SubmitException | CommitStatusException | CommitException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (GatewayException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -146,13 +146,13 @@ public class RecetaController {
             recetaService.firmarReceta(id, signature);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (EndorseException | SubmitException | CommitStatusException | CommitException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (GatewayException e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -179,7 +179,7 @@ public class RecetaController {
             e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
