@@ -33,9 +33,6 @@ public class VacunaController {
     @PostMapping("/crear")
     public ResponseEntity<AssetIdDto> crearVacuna(@RequestBody Vacuna vacuna) {
 
-        System.out.println("\n--> Submit Transaction: CrearVacuna");
-
-        // Validación básica
         if (vacuna == null || vacuna.getPatientDocumentNumber() == null || vacuna.getPatientDocumentNumber().isEmpty()) {
             System.err.println("Datos de vacuna inválidos: faltan campos requeridos.");
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
@@ -44,11 +41,6 @@ public class VacunaController {
         String now = LocalDateTime.now().toString();
         String dni = vacuna.getPatientDocumentNumber();
     
-
-        System.out.println("Vacuna recibida: " + vacuna);
-        System.out.println("DNI del paciente: " + dni);
-        System.out.println("Timestamp actual: " + now);
-
         String id = dni + now;
         String assetId = Hashing.sha256(id);
     
@@ -63,10 +55,7 @@ public class VacunaController {
 
         try {
     
-            System.out.println("Intentando registrar la vacuna..." + vacuna);
             vacunaService.cargarVacuna(vacuna);
-    
-            System.out.println("Vacuna registrada correctamente.");
             return new ResponseEntity<>(assetIdDto, HttpStatus.OK);
 
         } catch (CommitStatusException | EndorseException | CommitException | SubmitException e) {
