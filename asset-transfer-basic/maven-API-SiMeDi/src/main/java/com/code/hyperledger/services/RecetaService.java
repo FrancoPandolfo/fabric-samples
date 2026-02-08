@@ -102,6 +102,12 @@ public class RecetaService {
         contract = network.getContract(config.getChaincodeName());
     }
 
+
+    // Para facilitar testing
+    public void setContract(Contract contract) {
+        this.contract = contract;
+    }
+
     // crea dos recetas default, borrar cuando no se necesite
     private void initLedger() throws EndorseException, SubmitException, CommitStatusException, CommitException {
         contract.submitTransaction("InitLedger");
