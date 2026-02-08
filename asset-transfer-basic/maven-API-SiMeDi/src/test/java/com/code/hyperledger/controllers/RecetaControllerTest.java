@@ -28,8 +28,6 @@ public class RecetaControllerTest {
     @MockBean
     private RecetaService recetaService;
 
-    // --- Tests existentes (happy path) ---
-
     @Test
     public void testCrearReceta() throws Exception {
         doNothing().when(recetaService).cargarReceta(any(Receta.class));
@@ -93,8 +91,6 @@ public class RecetaControllerTest {
                 .content("{\"id\":\"123\"}"))
                 .andExpect(status().isOk());
     }
-
-    // --- Tests nuevos para validar errores y entradas inválidas ---
 
     @Test
     public void testCrearReceta_ServiceThrowsException() throws Exception {

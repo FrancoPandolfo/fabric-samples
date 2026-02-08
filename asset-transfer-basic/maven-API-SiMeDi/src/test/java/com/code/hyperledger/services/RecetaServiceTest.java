@@ -72,8 +72,6 @@ public class RecetaServiceTest {
         doThrow(new SubmitException("Submit failed", cause))
             .when(contract)
             .submitTransaction(eq("CreateReceta"), anyString());
-
-        // Service catches exception, so no throw
         recetaService.cargarReceta(receta);
 
         verify(contract, times(1))

@@ -38,8 +38,6 @@ public class VacunaServiceTest {
     public void setUp() throws Exception {
         MockitoAnnotations.openMocks(this);
         vacunaService = new VacunaService(config);
-
-        // Inyectar contract usando reflexión para evitar error de tipo
         Field contractField = VacunaService.class.getDeclaredField("contract");
         contractField.setAccessible(true);
         contractField.set(vacunaService, contract);

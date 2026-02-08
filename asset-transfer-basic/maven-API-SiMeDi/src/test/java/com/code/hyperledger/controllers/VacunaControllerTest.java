@@ -32,8 +32,6 @@ public class VacunaControllerTest {
     @MockBean
     private VacunaService vacunaService;
 
-    // --- Happy path tests ---
-
     @Test
     public void testCrearVacuna() throws Exception {
         doNothing().when(vacunaService).cargarVacuna(any(Vacuna.class));
@@ -94,8 +92,6 @@ public class VacunaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(vacunas.size()));
     }
-
-    // --- Tests for invalid input or errors ---
 
     @Test
     public void testCrearVacuna_BadRequestWhenMissingPatientDocumentNumber() throws Exception {
